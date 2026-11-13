@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>P and S Waves Through Earth</title>
+<style>
+:root{--bg:#f4f6fb;--card:#ffffff;--ink:#1b2a5e;--muted:#566089;--line:#d6dcf0;--gold:#e8a33d;--onGold:#1b2a5e;--p:#c8553d;--s:#1d7f8c;--mantle:#e08a3c;--outer:#f2c14e;--inner:#fff0b8;--edge:#1b2a5e;--label:#1b2a5e;--shadow:0 2px 10px rgba(27,42,94,.10);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1431;--card:#171f45;--ink:#eaf0ff;--muted:#a7b1d6;--line:#2b3668;--edge:#eaf0ff;--shadow:none;--p:#ee7a60;--s:#46b8c6}}
+:root[data-theme="dark"]{--bg:#0e1431;--card:#171f45;--ink:#eaf0ff;--muted:#a7b1d6;--line:#2b3668;--edge:#eaf0ff;--shadow:none;--p:#ee7a60;--s:#46b8c6}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 28px}
+h1{font:700 clamp(22px,3.2vw,32px)/1.15 Georgia,"Times New Roman",serif;margin:0 0 4px}
+.sub{margin:0 0 16px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:16px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.stage{padding:8px;display:flex;justify-content:center}
+canvas{display:block;touch-action:none;cursor:crosshair;max-width:100%}
+.panel{display:flex;flex-direction:column;gap:12px}
+h2{font:700 16px/1.2 system-ui,sans-serif;margin:0 0 8px}
+.hint{margin:0 0 10px;color:var(--muted);font-size:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.degbox{display:flex;align-items:center;gap:6px}
+input[type=number]{width:92px;font:700 22px/1 system-ui,sans-serif;padding:8px 10px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);text-align:center}
+input[type=number]:focus,button:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.degbox span{font:700 22px/1 system-ui,sans-serif}
+.seg{display:flex;gap:0;margin-top:10px}
+.seg button{flex:1;border:2px solid var(--line);background:var(--bg);color:var(--ink);padding:8px 10px;font:600 14px system-ui,sans-serif;cursor:pointer}
+.seg button:first-child{border-radius:10px 0 0 10px}.seg button:last-child{border-radius:0 10px 10px 0;border-left:0}
+.seg button.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.btns{display:flex;gap:10px;margin-bottom:10px}
+button.primary{flex:1;background:var(--gold);color:var(--onGold);border:0;border-radius:12px;padding:13px 16px;font:800 17px system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+button.primary:active{transform:translateY(1px)}
+button.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:12px 16px;font:700 15px system-ui,sans-serif;cursor:pointer}
+label.sl{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);margin:2px 0 8px}
+label.sl input{flex:1;accent-color:var(--gold)}
+label.sl output{min-width:38px;text-align:right;font-weight:700;color:var(--ink)}
+label.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin:5px 0;cursor:pointer}
+label.chk input{width:18px;height:18px;accent-color:var(--gold)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--muted)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.readout{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:15px;align-items:baseline}
+.readout .k{font-weight:700}
+.readout .clock{font:700 26px/1 ui-monospace,Menlo,Consolas,monospace}
+.pill{display:inline-block;border-radius:999px;padding:1px 9px;color:#fff;font-weight:700;font-size:13px}
+.explain{font-size:15px;line-height:1.5;border-left:6px solid var(--gold)}
+.explain b.p{color:var(--p)}.explain b.s{color:var(--s)}
+.explain button{margin-top:8px;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:6px 10px;font:600 13px system-ui,sans-serif;cursor:pointer}
+details summary{cursor:pointer;font-weight:700}
+details p{margin:8px 0 0;font-size:14px;color:var(--muted)}
+.note{font-size:12.5px;color:var(--muted);margin-top:10px}
+.mini{margin:-2px 0 8px 26px;font-size:12.5px;line-height:1.35;color:var(--muted)}
+.cnt{color:var(--muted);font-weight:700;font-size:13px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>How P and S Waves Travel Through Earth</h1>
+    <p class="sub">Choose an observation point, send the waves from the earthquake focus at the top, and watch where each one goes.</p>
+  </header>
+  <div class="grid">
+    <section class="card stage"><canvas id="cv" role="img" aria-label="Cross-section of Earth with the earthquake focus at the top. Click or drag around the edge to place an observation point."></canvas></section>
+    <aside class="panel">
+      <section class="card">
+        <h2>1. Choose an observation point</h2>
+        <p class="hint">Click or drag around Earth, or type an angle. The angle is measured around Earth from the earthquake focus.</p>
+        <div class="row"><label for="deg" style="font-weight:600">Angle from the focus</label><div class="degbox"><input id="deg" type="number" min="1" max="180" step="1" value="70" inputmode="numeric"><span>°</span></div></div>
+        <div class="seg" role="group" aria-label="Which side of Earth"><button id="sideL" type="button">◀ Left side</button><button id="sideR" type="button" class="on">Right side ▶</button></div>
+      </section>
+      <section class="card">
+        <h2>2. Send the waves</h2>
+        <div class="btns"><button id="go" class="primary" type="button">Send waves</button><button id="reset" class="ghost" type="button" title="Erase every ray and start over">Erase all rays</button></div>
+        <label class="sl" for="speed">Animation speed<input id="speed" type="range" min="0.4" max="3" step="0.1" value="1"><output id="speedOut">1×</output></label>
+        <label class="chk"><input id="remember" type="checkbox"> Remember previous trials <span id="histCount" class="cnt"></span></label>
+        <p class="mini">Unchecked: every trial starts on a fresh Earth. Checked: old tracks stay on the diagram so you can compare angles.</p>
+        <label class="chk"><input id="shade" type="checkbox"> Reveal the shadow zones (like the Day 3 diagram)</label>
+        <div class="legend"><span><i class="dot" style="background:var(--p)"></i>P wave: push and pull, faster</span><span><i class="dot" style="background:var(--s)"></i>S wave: side to side, slower</span></div>
+      </section>
+      <section class="card readout" aria-live="polite">
+        <div class="k">Time since the quake</div><div class="clock" id="clock">0:00</div>
+        <div class="k"><span class="pill" style="background:var(--p)">P</span></div><div id="pStat">Waiting to start</div>
+        <div class="k"><span class="pill" style="background:var(--s)">S</span></div><div id="sStat">Waiting to start</div>
+        <div class="k">S − P</div><div id="spStat">—</div>
+      </section>
+      <section class="card explain" id="explain" aria-live="polite"></section>
+      <details class="card"><summary>How does the model work?</summary>
+        <p>Each path follows Snell’s law in a round Earth. Rock gets stiffer with depth, so waves speed up as they go down, and that bends each path back toward the surface. At the core–mantle boundary (2,891 km deep) the rock becomes liquid: S waves stop, and P waves slow down and bend sharply toward the center.</p>
+        <p>This is a simplified Earth model tuned to match the classroom values (S waves stop at 103°). Real travel times vary a little from place to place, and the animation speed is faster than real time. The two waves keep their correct speeds relative to each other.</p>
+      </details>
+    </aside>
+  </div>
+</main>
+<script>
+// ---- Simplified Earth model + ray tracer (Snell's law in a sphere: p = r sin(i) / v is constant) ----
+const R = 6371, RCMB = 3480, RICB = 1221, D_CMB = R - RCMB, D_ICB = R - RICB;
+function lerp(a, b, f) { return a + (b - a) * f; }
+function vpMantle(d) {
+  if (d <= 220) return 8.0 + 0.55 * d / 220;
+  if (d <= 400) return 8.0 + d / 400;
+  if (d <= 700) return lerp(9.0, 10.8, (d - 400) / 300);
+  return 10.8 + (13.72 - 10.8) * Math.pow((d - 700) / 2191, 0.25);
+}
+function vsMantle(d) {
+  if (d <= 220) return lerp(4.45, 4.62, d / 220);
+  if (d <= 400) return lerp(4.62, 4.88, (d - 220) / 180);
+  if (d <= 700) return lerp(4.88, 5.95, (d - 400) / 300);
+  return 5.95 + (7.26 - 5.95) * Math.pow((d - 700) / 2191, 0.32);
+}
+function vpOuter(d) {
+  if (d <= 3700) return lerp(8.06, 8.8, (d - 2891) / 809);
+  if (d <= 4600) return lerp(8.8, 10.0, (d - 3700) / 900);
+  return lerp(10.0, 10.36, (d - 4600) / 550);
+}
+function vpInner(d) { return lerp(11.03, 11.26, (d - 5150) / 1221); }
+// kind: 'P' or 'S'.  hyp = true extends the mantle values straight down (used to aim a ray at a far point).
+function vel(r, kind, hyp) {
+  const d = R - r;
+  if (d < D_CMB || hyp) return kind === 'P' ? vpMantle(d) : vsMantle(d);
+  if (kind === 'S') return null;               // liquid outer core stops S waves
+  return d < D_ICB ? vpOuter(d) : vpInner(d);
+}
+// Trace one ray from the surface focus. Returns arrays of radius, angle (radians from the top), elapsed time (s).
+function trace(p, kind, hyp, ds0, frac) {
+  ds0 = ds0 || 2; frac = frac || 0.006;
+  let r = R, th = 0, dir = -1, t = 0, v = vel(r, kind, hyp);
+  if (p * v / r >= 1) return null;
+  const rs = [r], ths = [th], ts = [t];
+  for (let n = 0; n < 60000; n++) {
+    const ds = Math.min(ds0, frac * r + 0.05);
+    const i = Math.asin(Math.min(1, p * v / r)), c = Math.cos(i), s = Math.sin(i);
+    const dr = dir * ds * c, dth = ds * s / r, rn = r + dr;
+    if (rn >= R) {                                     // back at the surface
+      const fr = dr ? (R - r) / dr : 0;
+      th += dth * fr; t += ds * fr / v; rs.push(R); ths.push(th); ts.push(t);
+      return { r: rs, th: ths, t: ts, status: 'surface', delta: th * 180 / Math.PI, time: t };
+    }
+    if (rn <= 0.2) { th += Math.PI; dir = 1; r = 0.5; rs.push(r); ths.push(th); ts.push(t); continue; }
+    const vn = vel(rn, kind, hyp);
+    if (vn === null) return { r: rs, th: ths, t: ts, status: 'stopped', delta: th * 180 / Math.PI, time: t };
+    if (p * vn / rn >= 1) { dir = 1; th += ds / r; t += ds / v; rs.push(r); ths.push(th); ts.push(t); continue; }
+    r = rn; th += dth; v = vn; t += ds / v; rs.push(r); ths.push(th); ts.push(t);
+  }
+  return null;
+}
+function deltaOf(p, kind, hyp) { const o = trace(p, kind, hyp); return o && o.status === 'surface' ? o : null; }
+// Find the ray parameter whose hypothetical (extended-mantle) path reaches angular distance target (degrees).
+function aimParam(target, kind) {
+  let lo = 2, hi = R / vel(R, kind, true) - 1e-6;      // Delta decreases as p increases
+  for (let k = 0; k < 50; k++) {
+    const mid = (lo + hi) / 2, o = trace(mid, kind, true);
+    if (o && o.status === 'surface' && o.delta > target) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+// Stretch a traced path by a tiny factor so that it lands exactly on the target angle (removes step-size jitter).
+function landOn(o, target) {
+  const k = target / o.delta; for (let i = 0; i < o.th.length; i++) o.th[i] *= k; o.delta = target; return o;
+}
+let PGRID = null;                                     // cached delta(p) table for real P rays
+function pGrid() {
+  if (PGRID) return PGRID;
+  const pmax = R / vel(R, 'P', false), ps = [];
+  for (let p = pmax - 0.5; p > 254; p -= 4) ps.push(p);
+  for (let p = 254; p > 100; p -= 2) ps.push(p);
+  for (let p = 100; p > 1.5; p -= 2) ps.push(p);
+  PGRID = ps.map(p => { const o = deltaOf(p, 'P', false); return { p, d: o ? o.delta : null }; });
+  return PGRID;
+}
+// Earliest real P arrival at target (degrees): returns {p, o} or null (shadow zone).
+function pArrival(target) {
+  const g = pGrid(), brackets = [];
+  for (let i = 1; i < g.length; i++) {
+    const A = g[i - 1], B = g[i];
+    if (A.d !== null && B.d !== null && (A.d > target) !== (B.d > target)) brackets.push([A.p, B.p, A.d > target]);
+  }
+  let roots = [];
+  for (const [a, b, aPos] of brackets) {
+    let pa = a, pb = b;
+    for (let k = 0; k < 30; k++) {
+      const pm = (pa + pb) / 2, om = deltaOf(pm, 'P', false); if (!om) break;
+      if ((om.delta > target) === aPos) pa = pm; else pb = pm;
+    }
+    const pm = (pa + pb) / 2, om = trace(pm, 'P', false);
+    if (om && om.status === 'surface' && Math.abs(om.delta - target) < 1.0) roots.push({ p: pm, o: om });
+  }
+  for (let i = 0; i < g.length; i++) {              // grid points that land almost exactly on target (noise can hide a sign change)
+    if (g[i].d !== null && Math.abs(g[i].d - target) < 0.35) { const om = trace(g[i].p, 'P', false); if (om && om.status === 'surface' && Math.abs(om.delta - target) < 1.0) roots.push({ p: g[i].p, o: om }); }
+  }
+  if (!roots.length && target >= 172) {              // nearly straight through the center
+    const om = trace(3, 'P', false);
+    if (om && om.status === 'surface' && target - om.delta < 3) roots.push({ p: 3, o: om });
+  }
+  if (!roots.length) return null;
+  roots.sort((x, y) => x.o.time - y.o.time);
+  const best = roots[0]; landOn(best.o, target); return best;
+}
+
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const cv = $('cv'), ctx = cv.getContext('2d');
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const S = { delta: 70, side: 1, scene: null, T: 0, playing: false, last: 0, base: 1, until: 0, history: [] };
+let W = 600, H = 600, dpr = 1, cx = 300, cy = 320, RP = 230;
+const fmt = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const rad = d => d * Math.PI / 180;
+const P_COL = () => css('--p'), S_COL = () => css('--s');
+
+// ----- geometry -----
+function pt(r, th, side) { const k = RP / R; return [cx + (side || S.side) * r * k * Math.sin(th), cy - r * k * Math.cos(th)]; }
+function resize() {
+  const box = cv.parentElement.getBoundingClientRect();
+  const size = Math.max(280, Math.min(box.width - 16, 780));
+  dpr = window.devicePixelRatio || 1;
+  cv.style.width = size + 'px'; cv.style.height = size + 'px';
+  cv.width = Math.round(size * dpr); cv.height = Math.round(size * dpr);
+  W = H = size; cx = W / 2; cy = H * 0.515; RP = W * 0.345;
+  draw();
+}
+
+// ----- drawing -----
+function circle(x, y, r, fill, stroke, lw) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = stroke; ctx.stroke(); }
+function label(txt, x, y, size, color, weight, align, halo) {
+  ctx.font = (weight || 700) + ' ' + size + 'px system-ui,-apple-system,Segoe UI,sans-serif'; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle';
+  if (halo) { ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.strokeText(txt, x, y); }
+  ctx.fillStyle = color; ctx.fillText(txt, x, y);
+}
+function star(x, y, r, fill, stroke) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.42 : r; ctx.lineTo(x + rr * Math.cos(a), y + rr * Math.sin(a)); }
+  ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = 2.2; ctx.strokeStyle = stroke; ctx.stroke();
+}
+function arcAround(rr, d1, d2, color, lw) {                       // arc from d1 to d2 degrees (clockwise from the top), both sides
+  ctx.lineWidth = lw; ctx.strokeStyle = color; ctx.lineCap = 'butt';
+  ctx.beginPath(); ctx.arc(cx, cy, rr, -Math.PI / 2 + rad(d1), -Math.PI / 2 + rad(d2), false); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, rr, -Math.PI / 2 - rad(d2), -Math.PI / 2 - rad(d1), false); ctx.stroke();
+}
+function drawEarth() {
+  const k = RP / R, edge = css('--edge'), fs = Math.max(11, W * 0.021);
+  circle(cx, cy, RP, css('--mantle'), edge, 3);
+  circle(cx, cy, RCMB * k, css('--outer'), edge, 2.6);
+  circle(cx, cy, RICB * k, css('--inner'), edge, 2.6);
+  label('Mantle', cx - RP * 0.80, cy + RP * 0.02, fs, '#1b2a5e', 700);
+  label('Outer core (liquid)', cx, cy - RP * 0.405, fs, '#1b2a5e', 700);
+  label('Inner core', cx, cy + 3, fs * 0.92, '#1b2a5e', 600);
+  label('(solid)', cx, cy + fs * 1.2, fs * 0.8, '#1b2a5e', 500);
+  // degree scale on the active side
+  ctx.strokeStyle = edge; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.5;
+  for (let a = 30; a <= 150; a += 30) {
+    const x1 = cx + S.side * Math.sin(rad(a)) * (RP + 4), y1 = cy - Math.cos(rad(a)) * (RP + 4), x2 = cx + S.side * Math.sin(rad(a)) * (RP + 11), y2 = cy - Math.cos(rad(a)) * (RP + 11);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    label(a + '°', cx + S.side * Math.sin(rad(a)) * (RP + 24), cy - Math.cos(rad(a)) * (RP + 24), fs * 0.78, css('--muted'), 600);
+  }
+  ctx.globalAlpha = 1;
+  label('180°', cx, cy + RP + 24, fs * 0.78, css('--muted'), 600);
+}
+function drawShade() {
+  const a = css('--s'), b = css('--p'), fs = Math.max(11, W * 0.02);
+  arcAround(RP + 22, 103, 180, a, W * 0.016);
+  arcAround(RP + 38, 103, 142, b, W * 0.016);
+  const pos = (d, rr) => [cx + S.side * Math.sin(rad(d)) * rr, cy - Math.cos(rad(d)) * rr];
+  let q = pos(103, RP + 62); label('103°', q[0], q[1], fs, css('--muted'), 700);
+  q = pos(142, RP + 60); label('142°', q[0], q[1], fs, css('--muted'), 700);
+  label('No S beyond 103°', 10, H - 30, fs * 1.0, a, 800, 'left', true);
+  label('No P from 103° to 142°', W - 10, H - 12, fs * 1.0, b, 800, 'right', true);
+}
+function drawMarker() {
+  const d = S.delta, x = cx + S.side * Math.sin(rad(d)) * RP, y = cy - Math.cos(rad(d)) * RP;
+  const ux = (x - cx) / RP, uy = (y - cy) / RP, px = -uy, py = ux, edge = css('--edge');
+  ctx.beginPath(); ctx.moveTo(x + ux * 17, y + uy * 17); ctx.lineTo(x + px * 10, y + py * 10); ctx.lineTo(x - px * 10, y - py * 10); ctx.closePath();
+  ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = edge; ctx.stroke();
+  const lx = x + ux * 46, ly = y + uy * 46, txt = d + '°', fs = Math.max(14, W * 0.03);
+  ctx.font = '800 ' + fs + 'px system-ui,sans-serif'; const w = ctx.measureText(txt).width + 16;
+  ctx.fillStyle = css('--card'); ctx.strokeStyle = css('--line'); ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(lx - w / 2, ly - fs * 0.85, w, fs * 1.7, 9) : ctx.rect(lx - w / 2, ly - fs * 0.85, w, fs * 1.7); ctx.fill(); ctx.stroke();
+  label(txt, lx, ly + 1, fs, css('--ink'), 800);
+}
+function headIndex(t, T) { let lo = 0, hi = t.length - 1; if (T >= t[hi]) return hi; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (t[m] <= T) lo = m; else hi = m - 1; } return lo; }
+function rayPath(o, T, color, lw, dash, alpha, head, letter, side) {
+  if (T <= 0) return null;
+  const n = headIndex(o.t, T), stride = Math.max(1, Math.floor(n / 500));
+  ctx.save(); ctx.globalAlpha = alpha; ctx.lineWidth = lw; ctx.strokeStyle = color; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.setLineDash(dash || []);
+  ctx.beginPath(); let p0 = pt(o.r[0], o.th[0], side); ctx.moveTo(p0[0], p0[1]);
+  for (let i = stride; i <= n; i += stride) { const p = pt(o.r[i], o.th[i], side); ctx.lineTo(p[0], p[1]); }
+  let hp = pt(o.r[n], o.th[n], side);
+  if (n < o.t.length - 1) { const f = (T - o.t[n]) / (o.t[n + 1] - o.t[n]), a = pt(o.r[n + 1], o.th[n + 1], side); hp = [hp[0] + (a[0] - hp[0]) * f, hp[1] + (a[1] - hp[1]) * f]; }
+  ctx.lineTo(hp[0], hp[1]); ctx.stroke(); ctx.restore();
+  if (head) { circle(hp[0], hp[1], 9, color, '#ffffff', 2.4); label(letter, hp[0], hp[1] + 0.5, 11, '#ffffff', 800); }
+  return hp;
+}
+function cross(x, y, color, size) { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - size, y - size); ctx.lineTo(x + size, y + size); ctx.moveTo(x + size, y - size); ctx.lineTo(x - size, y + size); ctx.stroke(); ctx.restore(); }
+function pulse(x, y, color, since) { if (since < 0 || since > 1800) return; const f = since / 1800; ctx.save(); ctx.globalAlpha = 1 - f; ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y, 12 + f * 34, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+
+function draw() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  drawEarth();
+  if ($('shade').checked) drawShade();
+  const sc = S.scene, T = S.T, now = performance.now(), pc = P_COL(), scol = S_COL();
+  drawHistory();
+  if (sc) {
+    if (sc.P.faint) { rayPath(sc.P.faint, T, pc, 2.6, [7, 6], 0.85, false, '', sc.side);
+      if (T >= sc.P.faintEnd) { if (!sc.faintState.done) { sc.faintState.done = true; sc.faintState.at = now; } pulse(cx + sc.side * Math.sin(rad(sc.delta)) * RP, cy - Math.cos(rad(sc.delta)) * RP, pc, now - sc.faintState.at); } }
+    sc.rays.forEach(R_ => {
+      const hp = rayPath(R_.o, T, R_.color, R_.letter === 'S' ? 8 : 3.6, null, R_.letter === 'S' ? 0.88 : 1, T < R_.end || R_.keepHead, R_.letter, sc.side);
+      if (T >= R_.end && hp) {
+        if (!R_.done) { R_.done = true; R_.at = now; updateStatus(); }
+        if (R_.kind === 'stop') { cross(hp[0], hp[1], R_.color, 9); label('S stops', hp[0] + sc.side * 16, hp[1] - 6, Math.max(12, W * 0.024), R_.color, 800, sc.side > 0 ? 'left' : 'right', true); }
+        if (R_.kind === 'emerge') { circle(hp[0], hp[1], 7, R_.color, '#fff', 2.4); const ux = (hp[0] - cx) / RP, uy = (hp[1] - cy) / RP; label('P surfaces at ' + Math.round(sc.P.emerge) + '°', hp[0] + ux * 46, hp[1] + uy * 46, Math.max(12, W * 0.024), R_.color, 800, 'center', true); }
+        if (R_.kind === 'arrive') { const ox = cx + sc.side * Math.sin(rad(sc.delta)) * RP, oy = cy - Math.cos(rad(sc.delta)) * RP; pulse(ox, oy, R_.color, now - R_.at); }
+      }
+    });
+  }
+  // earthquake focus
+  star(cx, cy - RP, Math.max(11, W * 0.024), '#ffffff', css('--edge'));
+  label('Earthquake focus', cx, cy - RP - Math.max(24, W * 0.05), Math.max(13, W * 0.026), css('--ink'), 800);
+  drawMarker();
+}
+
+// ----- remembered trials -----
+function endMark(R_, side, color) {
+  const o = R_.o, i = o.r.length - 1, e = pt(o.r[i], o.th[i], side);
+  if (R_.kind === 'stop') cross(e[0], e[1], color, 6); else circle(e[0], e[1], 4, color, '#ffffff', 1.5);
+}
+function drawHistory() {
+  const pc = P_COL(), scol = S_COL(), fs = Math.max(11, W * 0.021);
+  S.history.forEach(hh => {
+    hh.rays.forEach(R_ => { const isS = R_.letter === 'S'; rayPath(R_.o, Infinity, isS ? scol : pc, isS ? 5.5 : 2.4, null, isS ? 0.8 : 0.9, false, '', hh.side); });
+    if (hh.faint) rayPath(hh.faint, Infinity, pc, 1.8, [6, 5], 0.7, false, '', hh.side);
+    hh.rays.forEach(R_ => endMark(R_, hh.side, R_.letter === 'S' ? scol : pc));
+    const x = cx + hh.side * Math.sin(rad(hh.delta)) * RP, y = cy - Math.cos(rad(hh.delta)) * RP, ux = (x - cx) / RP, uy = (y - cy) / RP;
+    circle(x, y, 4.5, css('--card'), css('--edge'), 2); label(hh.delta + '°', x + ux * 22, y + uy * 22, fs, css('--muted'), 700);
+  });
+}
+function updateCount() { const n = S.history.length; $('histCount').textContent = n ? '(' + n + ' saved)' : ''; }
+function commitScene() {                                           // keep the finished (or interrupted) trial on screen if "remember" is on
+  const sc = S.scene;
+  if (sc && S.T > 0 && $('remember').checked) { S.history.push({ side: sc.side, delta: sc.delta, rays: sc.rays, faint: sc.P.faint || null }); if (S.history.length > 60) S.history.shift(); }
+  updateCount();
+}
+function resetStatus() { $('clock').textContent = '0:00'; $('pStat').textContent = 'Waiting to start'; $('sStat').textContent = 'Waiting to start'; $('spStat').textContent = '—'; }
+function newPoint() { commitScene(); S.scene = null; S.T = 0; S.playing = false; resetStatus(); setIdleText(); draw(); }
+function eraseAll() { S.history = []; S.scene = null; S.T = 0; S.playing = false; resetStatus(); updateCount(); setIdleText(); draw(); }
+
+// ----- building a scene for one observation angle -----
+function minR(o) { let m = 1e9; for (let i = 0; i < o.r.length; i++) if (o.r[i] < m) m = o.r[i]; return m; }
+function buildScene(delta) {
+  const sc = { delta, side: S.side, rays: [], P: {}, S: {} };
+  // S wave: aim a ray at the observation point; if the liquid core is in the way, the ray stops at the boundary
+  const pS = aimParam(delta, 'S'), oS = trace(pS, 'S', false);
+  sc.S.arrives = oS.status === 'surface';
+  if (sc.S.arrives) { landOn(oS, delta); sc.S.time = oS.time; }
+  sc.rays.push({ o: oS, color: S_COL(), letter: 'S', kind: sc.S.arrives ? 'arrive' : 'stop', end: oS.time, keepHead: false });
+  oS.time = oS.t[oS.t.length - 1];
+  // P wave
+  const arr = pArrival(delta), pH = aimParam(delta, 'P'), oH = trace(pH, 'P', false);
+  if (arr && minR(arr.o) > RCMB) {
+    sc.P.type = 'direct'; sc.P.time = arr.o.time; sc.rays.push({ o: arr.o, color: P_COL(), letter: 'P', kind: 'arrive', end: arr.o.time });
+  } else if (arr && delta >= 142) {
+    sc.P.type = 'core'; sc.P.time = arr.o.time; sc.P.viaInner = minR(arr.o) < RICB; sc.rays.push({ o: arr.o, color: P_COL(), letter: 'P', kind: 'arrive', end: arr.o.time });
+  } else {
+    sc.P.type = arr ? 'faint' : 'shadow';
+    if (oH && oH.status === 'surface') { sc.P.emerge = oH.delta; sc.rays.push({ o: oH, color: P_COL(), letter: 'P', kind: 'emerge', end: oH.time }); }
+    if (arr) { sc.P.faint = arr.o; sc.P.faintTime = arr.o.time; sc.P.faintEnd = arr.o.time; sc.faintState = { at: 0, done: false }; }
+  }
+  sc.total = Math.max.apply(null, sc.rays.map(r => r.end));
+  return sc;
+}
+// ----- text -----
+function msg(sc) {
+  const d = sc.delta, sP = '<b class="p">P wave</b>', sS = '<b class="s">S wave</b>';
+  if (sc.P.type === 'direct') {
+    return `Both waves reach <b>${d}°</b>. Each path curves because rock gets stiffer with depth, so waves speed up as they go down. The ${sP} is faster, so it arrives first (<b>${fmt(sc.P.time)}</b>); the ${sS} follows at <b>${fmt(sc.S.time)}</b>. The S − P gap is <b>${fmt(sc.S.time - sc.P.time)}</b>, and the farther the quake, the bigger that gap.`;
+  }
+  const sPart = `The ${sS} never arrives here. It reaches the boundary of the outer core, 2,891 km down, and stops: <b>S waves cannot travel through liquid</b>.`;
+  if (sc.P.type === 'shadow') {
+    return `${sPart} No ${sP} arrives either. The P wave aimed at ${d}° slows down as it enters the liquid outer core and bends toward the center. It comes back to the surface at about <b>${Math.round(sc.P.emerge)}°</b>, far past this point. Every P ray that enters the core is bent like this, which leaves a <b>P-wave shadow zone</b> (about 103° to 142°). Try several angles with <b>Remember previous trials</b> on to watch the gap build up.<br><button type="button" id="tipRemember">Keep my tracks so I can try other angles</button>`;
+  }
+  if (sc.P.type === 'faint') {
+    return `${sPart} No strong ${sP} arrives either. The main P wave bends in the outer core and surfaces near <b>${Math.round(sc.P.emerge)}°</b>. Only a <b>faint</b> P wave (dashed path) reaches ${d}°: it passes through the <b>solid inner core</b> and arrives at <b>${fmt(sc.P.faintTime)}</b>. In 1936 Inge Lehmann used waves like this to discover the inner core.<br><button type="button" id="tipRemember">Keep my tracks so I can try other angles</button>`;
+  }
+  return `${sPart} The ${sP} is back: it has passed through the core, slowing down and bending as it entered and left, so it arrives late at <b>${fmt(sc.P.time)}</b>${sc.P.viaInner ? ' (through the solid inner core)' : ''}. P waves reach every angle except the shadow zone between about 103° and 142°.`;
+}
+function updateStatus() {
+  const sc = S.scene, T = S.T; if (!sc) { return; }
+  const pRay = sc.rays.find(r => r.letter === 'P'), sRay = sc.rays.find(r => r.letter === 'S');
+  const fin = r => r && T >= r.end;
+  $('pStat').textContent = !fin(pRay) ? (T > 0 ? 'Traveling…' : 'Ready') : (sc.P.type === 'direct' || sc.P.type === 'core') ? 'Arrived at ' + fmt(sc.P.time) : sc.P.type === 'faint' ? 'No strong P wave. Faint P arrives at ' + fmt(sc.P.faintTime) : 'No P wave arrives (shadow zone)';
+  $('sStat').textContent = !fin(sRay) ? (T > 0 ? 'Traveling…' : 'Ready') : sc.S.arrives ? 'Arrived at ' + fmt(sc.S.time) : 'No S wave arrives. Stopped at the liquid outer core';
+  $('spStat').textContent = (fin(pRay) && fin(sRay) && sc.S.arrives && (sc.P.type === 'direct')) ? fmt(sc.S.time - sc.P.time) + ' (S arrives later than P)' : '—';
+}
+
+// ----- control logic -----
+function setAngle(d, side) {
+  d = Math.max(1, Math.min(180, Math.round(d))); S.delta = d; if (side) S.side = side;
+  $('deg').value = d; $('sideL').classList.toggle('on', S.side < 0); $('sideR').classList.toggle('on', S.side > 0);
+  newPoint();
+}
+function setIdleText() {
+  const d = S.delta;
+  $('explain').innerHTML = `Observation point set at <b>${d}°</b> on the ${S.side > 0 ? 'right' : 'left'} side. Press <b>Send waves</b> to release a <b class="p">P wave</b> and an <b class="s">S wave</b> from the earthquake focus. Try angles below 103°, then above it. Tick <b>Remember previous trials</b> to keep old tracks and build up the full picture.`;
+}
+function send() {
+  commitScene();
+  const sc = buildScene(S.delta); S.scene = sc; S.T = 0; S.playing = true; S.last = performance.now(); S.base = sc.total / 16;
+  $('explain').innerHTML = msg(sc);
+  const tip = $('tipRemember'); if (tip) tip.addEventListener('click', () => { $('remember').checked = true; updateCount(); draw(); });
+  updateStatus(); loop(performance.now());
+}
+function loop(ts) {
+  if (!S.scene) return;
+  const dt = Math.min(0.1, (ts - S.last) / 1000); S.last = ts;
+  if (S.playing) { S.T += dt * S.base * parseFloat($('speed').value); }
+  const sc = S.scene, allDone = sc.rays.every(r => S.T >= r.end) && S.T >= sc.total && (!sc.P.faint || S.T >= sc.P.faintEnd);
+  if (S.playing && allDone) { S.playing = false; S.until = performance.now() + 2200; S.T = Math.max(S.T, sc.total); }
+  $('clock').textContent = fmt(S.T); updateStatus(); draw();
+  if (S.playing || performance.now() < S.until) requestAnimationFrame(loop);
+}
+function fromPointer(e) {
+  const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * (W / r.width) - cx, y = (e.clientY - r.top) * (H / r.height) - cy;
+  const phi = Math.atan2(Math.abs(x), -y) * 180 / Math.PI;               // 0 at the top, 180 at the bottom
+  if (Math.hypot(x, y) < 6) return;
+  setAngle(phi, x >= 0 ? 1 : -1);
+}
+let dragging = false;
+cv.addEventListener('pointerdown', e => { dragging = true; cv.setPointerCapture && cv.setPointerCapture(e.pointerId); fromPointer(e); });
+cv.addEventListener('pointermove', e => { if (dragging) fromPointer(e); });
+cv.addEventListener('pointerup', () => { dragging = false; });
+cv.addEventListener('pointercancel', () => { dragging = false; });
+$('deg').addEventListener('input', e => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= 1) { S.delta = Math.min(180, Math.round(v)); newPoint(); } });
+$('deg').addEventListener('change', e => { const v = parseFloat(e.target.value); setAngle(isNaN(v) ? S.delta : v); });
+$('deg').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+$('sideL').addEventListener('click', () => setAngle(S.delta, -1));
+$('sideR').addEventListener('click', () => setAngle(S.delta, 1));
+$('go').addEventListener('click', send);
+$('reset').addEventListener('click', eraseAll);
+$('speed').addEventListener('input', () => { $('speedOut').textContent = parseFloat($('speed').value).toFixed(1).replace('.0', '') + '×'; });
+$('shade').addEventListener('change', draw);
+$('remember').addEventListener('change', () => { if (!$('remember').checked) S.history = []; updateCount(); draw(); });   // turning it off gives a fresh Earth again
+window.addEventListener('resize', resize);
+if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { draw(); });
+resize(); setIdleText();
+setTimeout(() => { try { pGrid(); } catch (e) {} }, 60);   // warm up the ray tables
+window.__app = { S, setAngle, send, buildScene, draw, eraseAll };
+})();
+
+</script>
+</body>
+</html>
